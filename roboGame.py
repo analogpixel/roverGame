@@ -15,7 +15,8 @@ def exitGame(usegpio):
   sys.exit()
 
 def lm(message):
-  print(message)
+  pass
+  #print(message)
   
 play =False
 
@@ -82,6 +83,9 @@ if __name__ == '__main__':
       clock.tick(C_FPS)
       tic += 1
 
+      if C_USEGPIO:
+        robot = pollGPIO(C_GPIOCONFIG, robot)
+      
       lm("Polling for keyboard events")
       for event in pygame.event.get():
         if event.type  ==  pygame.KEYDOWN:
