@@ -2,7 +2,7 @@
 Interface to the buttons on the pi
 """
 import RPi.GPIO as GPIO
-deom robotCommands import *
+from robotCommands import *
 
 def configGPIO(config):
   GPIO.cleanup()
