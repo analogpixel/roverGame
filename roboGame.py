@@ -76,7 +76,7 @@ if __name__ == '__main__':
       from buttonInterface import *
       lm("Configuring GPIO")
       configGPIO( C_GPIOCONFIG )
-      ln("Configured")
+      lm("Configured")
       
     while True:
       clock.tick(C_FPS)
