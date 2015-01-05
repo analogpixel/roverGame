@@ -34,10 +34,14 @@ if __name__ == '__main__':
         C_HWSURF     = config.getboolean('config', 'useHWSurface')
         C_DBUFFER    = config.getboolean('config', 'useDoubleBuffer')
         C_USEGPIO    = config.getboolean('config', 'useGPIO')
-        C_GPIOCONFIG = config.options('GPIO')
+
         C_FPS        = config.getint('config','fps')
         C_COLORDEPTH = config.getint('config','colorDepth')
         C_TILESIZE   = 0 # define in loadMap
+
+        C_GPIOCONFIG = []
+        for xyz in config.options('GPIO'):
+          C_GPIOCONFIG.append( eval( config.get('GPIO',xyz)) )
           
     pygame.init()
     flags = 0
