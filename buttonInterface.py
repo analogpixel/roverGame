@@ -2,7 +2,8 @@
 Interface to the buttons on the pi
 """
 import RPi.GPIO as GPIO
-      
+deom robotCommands import *
+
 def configGPIO(config):
   GPIO.cleanup()
   GPIO.setmode(GPIO.BCM)
