@@ -14,10 +14,14 @@ def exitGame(usegpio):
     GPIO.cleanup()
   sys.exit()
 
+def lm(message):
+  print(message)
+  
 play =False
 
 if __name__ == '__main__':
-    
+
+    lm("Loading Config")
     # read configuration file
     config = ConfigParser.SafeConfigParser()
     if os.path.isfile("run.cfg"):
@@ -46,24 +50,35 @@ if __name__ == '__main__':
     if C_DBUFFER:
       flags = flags | pygame.DOUBLEBUF
 
+    lm("Config Loaded")
+    
+    lm("Loading command image")
     commandImage  = pygame.image.load("./resources/commands.png")
     commandLayout = {'turnClockwise':0 ,'turnCounterClockwise': 100 ,'moveForward':200 }
+    lm("Image loaded")
+
     clock         = pygame.time.Clock()
     screen        = pygame.display.set_mode((C_WIDTH, C_HEIGHT), flags, C_COLORDEPTH)
+
+    lm("Loading Map")
     [mapImage, checkCrash, C_TILESIZE, mapGoal] = loadMap("./maps/map1.json", "./resources/grassTexture.jpg")
-    
+    lm("Map Loaded")
+
     robot = createSprite("robot",(400,400))
     goal  = createSprite("goal",mapGoal)
     tic = 0
 
     if C_USEGPIO:
       from buttonInterface import *
+      lm("Configuring GPIO")
       configGPIO( C_GPIOCONFIG )
+      ln("Configured")
       
     while True:
       clock.tick(C_FPS)
       tic += 1
-      
+
+      lm("Polling for keyboard events")
       for event in pygame.event.get():
         if event.type  ==  pygame.KEYDOWN:
           if event.key == pygame.K_LEFT:
@@ -82,16 +97,20 @@ if __name__ == '__main__':
         if event.type == pygame.QUIT or \
            (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
             sys.exit()
+
+      lm("Poll finished")
       
+      lm("Drawing the screen")
       # draw Loop
       screen.blit( mapImage, (0,0) )
       goal  = drawSprite(goal, tic, C_FPS, screen)
       robot = drawSprite(robot, tic, C_FPS , screen)
       robot = drawCommands(robot, commandImage, commandLayout, C_HEIGHT, C_TILESIZE, screen)
-      
         
       pygame.display.flip()
+      lm("Draw finished")
 
+      lm("Updating Logic")
       # game loop
       if robot['active']:
         robot = updateRobot(robot)
@@ -104,3 +123,5 @@ if __name__ == '__main__':
       if checkCrash( robot['x']   , robot['y'] ):
         print("Dead")
         exitGame(C_USEGPIO)
+      lm("Finished")
+      
