@@ -8,12 +8,14 @@ def configGPIO(config):
   GPIO.setmode(GPIO.BCM)
 
   for opt in config:
-    GPIO.setup( int(config['in']) , GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect( int(config['in']) , GPIO.FALLING)
+    opt = eval(opt)
+    GPIO.setup( int(opt['in']) , GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect( int(opt['in']) , GPIO.FALLING)
 
 
 def pollGPIO(config, robot):
   for opt in config:
+    opt = eval(opt)
     if GPIO.event_detected(int(opt['in'])):
       pushQ(opt['command'])
     
