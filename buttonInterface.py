@@ -15,6 +15,6 @@ def configGPIO(config):
 def pollGPIO(config, robot):
   for opt in config:
     if GPIO.event_detected(int(opt['in'])):
-      pushQ(opt['command'])
-    
+      robot = pushQ(robot, opt['command'])
+  return robot
     
