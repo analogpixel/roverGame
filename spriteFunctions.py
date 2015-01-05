@@ -65,7 +65,7 @@ def drawCommands(data, commandImage, commandLayout, screenHeight, tileSize, scre
     return data
   x = 0
   for command in reversed(data['commandq']):
-    if data['commandq'] in commandLayout:
+    if command in commandLayout:
       screen.blit( commandImage , (x, screenHeight - tileSize), (commandLayout[command], 0, 100,100))
       x = x + tileSize
   return data
