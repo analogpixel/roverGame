@@ -56,7 +56,7 @@ def getNextCommand(data):
   if "commandq" in data and len(data["commandq"]) > 0:
     data["currentCommand"] = data["commandq"].pop(0)
     data = globals()[data['currentCommand']](data)
-  
+
   return data
 
 def updateRobot(data):
@@ -65,8 +65,8 @@ def updateRobot(data):
   """
   if not "currentCommand" in data:
     return getNextCommand(data)
-    
+
   if data['xdest'] == data['x'] and data['ydest'] == data['y'] and data['rdest'] == data['r']:
     data = getNextCommand(data)
-  
+
   return data

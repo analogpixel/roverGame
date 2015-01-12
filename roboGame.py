@@ -17,7 +17,7 @@ def exitGame(usegpio):
 def lm(message):
   pass
   #print(message)
-  
+
 play =False
 
 if __name__ == '__main__':
@@ -43,8 +43,11 @@ if __name__ == '__main__':
         C_GPIOCONFIG = []
         for xyz in config.options('GPIO'):
           C_GPIOCONFIG.append( eval( config.get('GPIO',xyz)) )
-          
+
+
+    pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=4096)
     pygame.init()
+
     flags = 0
     if C_FULLSCREEN:
       flags = flags | pygame.FULLSCREEN
@@ -56,7 +59,7 @@ if __name__ == '__main__':
       flags = flags | pygame.DOUBLEBUF
 
     lm("Config Loaded")
-    
+
     lm("Loading command image")
     commandImage  = pygame.image.load("./resources/commands.png")
     commandLayout = {'turnClockwise':0 ,'turnCounterClockwise': 100 ,'moveForward':200 }
@@ -78,14 +81,14 @@ if __name__ == '__main__':
       lm("Configuring GPIO")
       configGPIO( C_GPIOCONFIG )
       lm("Configured")
-      
+
     while True:
       clock.tick(C_FPS)
       tic += 1
 
       if C_USEGPIO:
         robot = pollGPIO(C_GPIOCONFIG, robot)
-      
+
       lm("Polling for keyboard events")
       for event in pygame.event.get():
         if event.type  ==  pygame.KEYDOWN:
@@ -107,14 +110,14 @@ if __name__ == '__main__':
             sys.exit()
 
       lm("Poll finished")
-      
+
       lm("Drawing the screen")
       # draw Loop
       screen.blit( mapImage, (0,0) )
       goal  = drawSprite(goal, tic, C_FPS, screen)
       robot = drawSprite(robot, tic, C_FPS , screen)
       robot = drawCommands(robot, commandImage, commandLayout, C_HEIGHT, C_TILESIZE, screen)
-        
+
       pygame.display.flip()
       lm("Draw finished")
 
@@ -127,9 +130,13 @@ if __name__ == '__main__':
       if spriteCrash(robot, goal):
         print("WIN")
         exitGame(C_USEGPIO)
-        
+
       if checkCrash( robot['x']   , robot['y'] ):
         print("Dead")
         exitGame(C_USEGPIO)
+
+      # update the state of the robot if anything
+      # changed do stuff
+      robot = updateState(robot)
+
       lm("Finished")
-      
