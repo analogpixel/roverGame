@@ -26,20 +26,19 @@ def createSprite(name, pos=(0,0)):
     "sound": False
   }
 
-def updateState(data):
+def updateState(data, soundData):
   # http://www.pygame.org/docs/ref/mixer.html
   if data['oldState'] != data['state']:
 
-    # stop any existing sounds
-    if data['sound']:
-      data['sound'].stop()
+    oldState = "%s_%s" % (data['name'], data['oldState'])
+    newState = "%s_%s" % (data['name'], data['state'])
 
-    path = "resources/%s_%s.wav" % (data['name'], data['state'])
-    if os.path.exists(path):
-      data['sound'] = pygame.mixer.Sound(path)
-      data['sound'].play(fade_ms=1000)
-    else:
-      data['sound'] = False
+    # stop any existing sounds
+    if oldState in soundData:
+      soundData[oldState]['sound'].stop()
+
+    if newState in soundData:
+      soundData[newState]['sound'].play(fade_ms=1000)
 
   data['oldState'] = data['state']
   return data
