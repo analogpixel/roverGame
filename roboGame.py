@@ -44,14 +44,13 @@ if __name__ == '__main__':
         for xyz in config.options('GPIO'):
           C_GPIOCONFIG.append( eval( config.get('GPIO',xyz)) )
 
-        pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=4096)
+        pygame.mixer.init()
         C_SOUNDS = {}
         for xyz in config.options('sounds'):
           t = eval(config.get('sounds', xyz))
           C_SOUNDS[xyz] = {}
-          C_SOUNDS[xyz]['sound'] = pygame.mixer.Sound( "resources/%s" %  t['wav'] )
+          C_SOUNDS[xyz]['sound'] = pygame.mixer.Sound( "resources/wav/%s" %  t['wav'] )
           C_SOUNDS[xyz]['loop']  = t['loop']
-
 
     pygame.init()
 
@@ -116,6 +115,10 @@ if __name__ == '__main__':
            (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
             sys.exit()
 
+      # update the state of the robot if anything
+      # changed do stuff play sounds if needed
+      robot = updateState(robot, C_SOUNDS)
+
       lm("Poll finished")
 
       lm("Drawing the screen")
@@ -142,8 +145,6 @@ if __name__ == '__main__':
         print("Dead")
         exitGame(C_USEGPIO)
 
-      # update the state of the robot if anything
-      # changed do stuff play sounds if needed
-      robot = updateState(robot, C_SOUNDS)
+
 
       lm("Finished")

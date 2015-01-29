@@ -38,7 +38,7 @@ def updateState(data, soundData):
       soundData[oldState]['sound'].stop()
 
     if newState in soundData:
-      soundData[newState]['sound'].play(fade_ms=1000)
+      soundData[newState]['sound'].play(loops=soundData[newState]['loop'])
 
   data['oldState'] = data['state']
   return data
