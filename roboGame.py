@@ -115,27 +115,17 @@ if __name__ == '__main__':
            (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
             sys.exit()
 
-      # update the state of the robot if anything
-      # changed do stuff play sounds if needed
-      robot = updateState(robot, C_SOUNDS)
+      # game loop
+      if robot['active']:
+        robot = moveSprite(robot, C_SOUNDS)
+        robot = updateRobot(robot)
+        robot = updateState(robot, C_SOUNDS)
 
-      lm("Poll finished")
-
-      lm("Drawing the screen")
-      # draw Loop
       screen.blit( mapImage, (0,0) )
       goal  = drawSprite(goal, tic, C_FPS, screen)
       robot = drawSprite(robot, tic, C_FPS , screen)
       robot = drawCommands(robot, commandImage, commandLayout, C_HEIGHT, C_TILESIZE, screen)
-
       pygame.display.flip()
-      lm("Draw finished")
-
-      lm("Updating Logic")
-      # game loop
-      if robot['active']:
-        robot = updateRobot(robot)
-        robot = moveSprite(robot)
 
       if spriteCrash(robot, goal):
         print("WIN")

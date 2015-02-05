@@ -5,6 +5,7 @@ import os.path
 import pygame
 from localutil import *
 import math
+import time
 
 def createSprite(name, pos=(0,0)):
   """
@@ -39,8 +40,9 @@ def updateState(data, soundData):
 
     if newState in soundData:
       soundData[newState]['sound'].play(loops=soundData[newState]['loop'])
+      time.sleep(0.2)
 
-  data['oldState'] = data['state']
+    data['oldState'] = data['state']
   return data
 
 def rot_center(image, angle):
@@ -73,7 +75,7 @@ def drawSprite(data,tic, fps, canvas):
   return data
 
 
-def moveSprite(data):
+def moveSprite(data, soundData):
   state = "stopped"
   for c in ['x','y','r']:
     if not( data[c] == data[c + "dest"]):
