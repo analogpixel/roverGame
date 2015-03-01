@@ -4,11 +4,13 @@ Commands to control the robot
 import math
 
 def activate(data):
-  data['active'] = True
+  #data['active'] = True
+  data['state'] = "moving"
   return data
 
 def deactivate(data):
-  data['active'] = False
+  #data['active'] = False
+  data['state'] = "stopped"
   return data
 
 def turnCounterClockwise(data):
@@ -66,7 +68,12 @@ def updateRobot(data):
   if not "currentCommand" in data:
     return getNextCommand(data)
 
+  # if we aren't moving and there is no data in the q then the game is over
+  # otherwise get and exectute the next command
   if data['xdest'] == data['x'] and data['ydest'] == data['y'] and data['rdest'] == data['r']:
-    data = getNextCommand(data)
+    if  len(data['commandq']) == 0:
+      data['state'] = 'lose'
+    else:
+      data = getNextCommand(data)
 
   return data

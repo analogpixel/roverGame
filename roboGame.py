@@ -51,6 +51,7 @@ if __name__ == '__main__':
           C_SOUNDS[xyz] = {}
           C_SOUNDS[xyz]['sound'] = pygame.mixer.Sound( "resources/wav/%s" %  t['wav'] )
           C_SOUNDS[xyz]['loop']  = t['loop']
+        C_INPUTACTIVE = True
 
     pygame.init()
 
@@ -92,34 +93,46 @@ if __name__ == '__main__':
       clock.tick(C_FPS)
       tic += 1
 
-      if C_USEGPIO:
-        robot = pollGPIO(C_GPIOCONFIG, robot)
+      # there are two phases:
+      # phase 1 input your commands
+      # phase 2 let the commands run
+      # in phase two no input is allowed
+      if C_INPUTACTIVE:
+        if C_USEGPIO:
+          robot = pollGPIO(C_GPIOCONFIG, robot)
 
-      lm("Polling for keyboard events")
-      for event in pygame.event.get():
-        if event.type  ==  pygame.KEYDOWN:
-          if event.key == pygame.K_LEFT:
-            robot = pushQ(robot, "turnCounterClockwise")
-          if event.key == pygame.K_RIGHT:
-            robot = pushQ(robot, "turnClockwise")
-          if event.key == pygame.K_UP:
-            robot = pushQ(robot,"moveForward")
-          if event.key == pygame.K_p:
-            robot = activate(robot)
-          if event.key == pygame.K_c:
-            robot = clearQ()
-          if event.key == pygame.K_n:
-            robot = activate(robot)
+        lm("Polling for keyboard events")
+        for event in pygame.event.get():
+          if event.type  ==  pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+              robot = pushQ(robot, "turnCounterClockwise")
+            if event.key == pygame.K_RIGHT:
+              robot = pushQ(robot, "turnClockwise")
+            if event.key == pygame.K_UP:
+              robot = pushQ(robot,"moveForward")
+            if event.key == pygame.K_p:
+              robot = activate(robot)
+            if event.key == pygame.K_c:
+              robot = clearQ()
+            if event.key == pygame.K_n:
+              robot['state'] = "moving"
 
-        if event.type == pygame.QUIT or \
-           (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-            sys.exit()
+          if event.type == pygame.QUIT or \
+             (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+              exitGame(C_USEGPIO)
+              sys.exit()
 
       # game loop
-      if robot['active']:
-        robot = moveSprite(robot, C_SOUNDS)
+      if robot['state'] == "moving" and spriteCrash(robot, goal):
+        robot['state'] = 'win'
+
+      if robot['state'] == "moving" and checkCrash( robot['x']   , robot['y'] ):
+        robot['state'] = 'lose'
+
+      if robot['state'] == "moving":
         robot = updateRobot(robot)
         robot = updateState(robot, C_SOUNDS)
+        robot = moveSprite(robot, C_SOUNDS)
 
       screen.blit( mapImage, (0,0) )
       goal  = drawSprite(goal, tic, C_FPS, screen)
@@ -127,14 +140,9 @@ if __name__ == '__main__':
       robot = drawCommands(robot, commandImage, commandLayout, C_HEIGHT, C_TILESIZE, screen)
       pygame.display.flip()
 
-      if spriteCrash(robot, goal):
-        print("WIN")
-        exitGame(C_USEGPIO)
-
-      if checkCrash( robot['x']   , robot['y'] ):
-        print("Dead")
-        exitGame(C_USEGPIO)
 
 
+      # if robot['state'] == 'win' or robot['state'] == 'lose':
+      #   showMenu()
 
       lm("Finished")

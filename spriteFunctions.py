@@ -76,14 +76,9 @@ def drawSprite(data,tic, fps, canvas):
 
 
 def moveSprite(data, soundData):
-  state = "stopped"
   for c in ['x','y','r']:
     if not( data[c] == data[c + "dest"]):
-      #print c,data[c], data[c + "dest"]
       data[c] += 5 * int( (data[c + "dest"] - data[c]) / abs(data[c + "dest"] - data[c]) )
-      state = "moving"
-
-  data['state'] = state
   return data
 
 
