@@ -3,77 +3,84 @@ Commands to control the robot
 """
 import math
 
-def activate(data):
-  #data['active'] = True
-  data['state'] = "moving"
-  return data
+def calcWin(system):
+  if system['sprite_robot']['state'] == "moving" and \
+     system['sprite_robot']['x'] == system['sprite_goal']['x'] and \
+     system['sprite_robot']['y'] == system['sprite_goal']['y']:
+    system['sprite_robot']['state'] = 'win'
+  return system
 
-def deactivate(data):
-  #data['active'] = False
-  data['state'] = "stopped"
-  return data
+def calcCrash(system):
+  if system['sprite_robot']['state'] == "moving" and \
+     system['crashFunction']( system['sprite_robot']['x'], \
+                              system['sprite_robot']['y']):
+    system['sprite_robot']['state'] = 'lose'
+  return system
 
-def turnCounterClockwise(data):
+def turnCounterClockwise(system):
   """
   subtract 90deg from r; return object
   """
-  data['rdest'] = data['r'] - 90
-  return data
+  system['sprite_robot']['rdest'] = system['sprite_robot']['r'] - 90
+  return system
 
-def turnClockwise(data):
+def turnClockwise(system):
   """
   add 90deg to the r; return object
   """
-  data['rdest'] = data['r'] + 90
-  return data
+  system['sprite_robot']['rdest'] = system['sprite_robot']['r'] + 90
+  return system
 
-def moveForward(data):
+def moveForward(system):
   """
   calculate what forward is based on r, and then return
   the object with the x,y updated based on that
   """
-  xinc =  int(math.cos((data['r'] - 90) * (math.pi/180)))
-  yinc = int(math.sin((data['r'] - 90) * (math.pi/180)))
-  data['xdest'] += 100 * xinc
-  data['ydest'] += 100 * yinc
-  return data
+  xinc =  int(math.cos((system['sprite_robot']['r'] - 90) * (math.pi/180)))
+  yinc = int(math.sin((system['sprite_robot']['r'] - 90) * (math.pi/180)))
+  system['sprite_robot']['xdest'] += 100 * xinc
+  system['sprite_robot']['ydest'] += 100 * yinc
+  return system
 
-def pushQ(data, command):
+def pushQ(command, system):
   """
   Add a command which is also a callable function to the q
   return the data
   """
-  if "commandq" in data:
-    data['commandq'].append(command)
+  if "commandq" in system:
+    system['commandq'].append(command)
   else:
-    data['commandq'] = [command]
+    system['commandq'] = [command]
 
-  return data
+  return system
 
-def getNextCommand(data):
+def getNextCommand(system):
   """
   pop off a command which is also a function name
   run that function with the data and return the result
   """
-  if "commandq" in data and len(data["commandq"]) > 0:
-    data["currentCommand"] = data["commandq"].pop(0)
-    data = globals()[data['currentCommand']](data)
+  if "commandq" in system and len(system["commandq"]) > 0:
+    system["currentCommand"] = system["commandq"].pop(0)
+    system = globals()[system['currentCommand']](system)
 
-  return data
+  return system
 
-def updateRobot(data):
+def updateRobot(system):
   """
   if the robot is done moving and has more commands then pop off the next command
   """
-  if not "currentCommand" in data:
-    return getNextCommand(data)
+  if not "currentCommand" in system:
+    return getNextCommand(system)
 
   # if we aren't moving and there is no data in the q then the game is over
   # otherwise get and exectute the next command
-  if data['xdest'] == data['x'] and data['ydest'] == data['y'] and data['rdest'] == data['r']:
-    if  len(data['commandq']) == 0:
-      data['state'] = 'lose'
+  if system['sprite_robot']['xdest'] == system['sprite_robot']['x'] and \
+     system['sprite_robot']['ydest'] == system['sprite_robot']['y'] and \
+     system['sprite_robot']['rdest'] == system['sprite_robot']['r']:
+    if  len(system['commandq']) == 0:
+      system['sprite_robot']['state'] = 'lose'
+      system['lose_message'] = "Robot lost"
     else:
-      data = getNextCommand(data)
+      system = getNextCommand(system)
 
-  return data
+  return system

@@ -9,140 +9,140 @@ from localutil import *
 from robotCommands import *
 
 
-def exitGame(usegpio):
-  if usegpio:
+def exitGame(system):
+  if system['CONFIG']['C_USEGPIO']:
     GPIO.cleanup()
   sys.exit()
 
-def lm(message):
-  pass
-  #print(message)
-
-play =False
+system = { 'CONFIG': {} }
 
 if __name__ == '__main__':
 
-    lm("Loading Config")
     # read configuration file
-    config = ConfigParser.SafeConfigParser()
+    c = ConfigParser.SafeConfigParser()
     if os.path.isfile("run.cfg"):
-        config.read('run.cfg')
-        C_FULLSCREEN = config.getboolean('config', 'fullscreen')
-        C_WIDTH      = config.getint('config', 'width')
-        C_HEIGHT     = config.getint('config', 'height')
-        C_NOFRAME    = config.getboolean('config', 'windowFrameOff')
-        C_GRIDON     = config.getboolean('gameDynamics', 'gridValue')
-        C_HWSURF     = config.getboolean('config', 'useHWSurface')
-        C_DBUFFER    = config.getboolean('config', 'useDoubleBuffer')
-        C_USEGPIO    = config.getboolean('config', 'useGPIO')
+        c.read('run.cfg')
+        system['CONFIG']['C_FULLSCREEN'] = c.getboolean('config', 'fullscreen')
+        system['CONFIG']['C_WIDTH']      = c.getint('config', 'width')
+        system['CONFIG']['C_HEIGHT']     = c.getint('config', 'height')
+        system['CONFIG']['C_NOFRAME']    = c.getboolean('config', 'windowFrameOff')
+        system['CONFIG']['C_GRIDON']     = c.getboolean('gameDynamics', 'gridValue')
+        system['CONFIG']['C_HWSURF']     = c.getboolean('config', 'useHWSurface')
+        system['CONFIG']['C_DBUFFER']    = c.getboolean('config', 'useDoubleBuffer')
+        system['CONFIG']['C_USEGPIO']    = c.getboolean('config', 'useGPIO')
+        system['CONFIG']['C_FPS']        = c.getint('config','fps')
+        system['CONFIG']['C_COLORDEPTH'] = c.getint('config','colorDepth')
+        system['CONFIG']['C_TILESIZE']   = 0 # define in loadMap
+        system['CONFIG']['C_GPIOCONFIG'] = []
 
-        C_FPS        = config.getint('config','fps')
-        C_COLORDEPTH = config.getint('config','colorDepth')
-        C_TILESIZE   = 0 # define in loadMap
-
-        C_GPIOCONFIG = []
-        for xyz in config.options('GPIO'):
-          C_GPIOCONFIG.append( eval( config.get('GPIO',xyz)) )
+        for xyz in c.options('GPIO'):
+          system['CONFIG']['C_GPIOCONFIG'].append( eval( c.get('GPIO',xyz)) )
 
         pygame.mixer.init()
-        C_SOUNDS = {}
-        for xyz in config.options('sounds'):
-          t = eval(config.get('sounds', xyz))
-          C_SOUNDS[xyz] = {}
-          C_SOUNDS[xyz]['sound'] = pygame.mixer.Sound( "resources/wav/%s" %  t['wav'] )
-          C_SOUNDS[xyz]['loop']  = t['loop']
-        C_INPUTACTIVE = True
+        system['CONFIG']['C_SOUNDS'] = {}
+        for xyz in c.options('sounds'):
+          t = eval(c.get('sounds', xyz))
+          system['CONFIG']['C_SOUNDS'][xyz] = {}
+          system['CONFIG']['C_SOUNDS'][xyz]['sound'] = pygame.mixer.Sound( "resources/wav/%s" %  t['wav'] )
+          system['CONFIG']['C_SOUNDS'][xyz]['loop']  = t['loop']
+        system['CONFIG']['C_INPUTACTIVE'] = True
 
     pygame.init()
 
     flags = 0
-    if C_FULLSCREEN:
+    if system['CONFIG']['C_FULLSCREEN']:
       flags = flags | pygame.FULLSCREEN
-    if C_NOFRAME:
+    if system['CONFIG']['C_NOFRAME']:
       flags = flags | pygame.NOFRAME
-    if C_HWSURF:
+    if system['CONFIG']['C_HWSURF']:
       flags = flags | pygame.HWSURFACE
-    if C_DBUFFER:
+    if system['CONFIG']['C_DBUFFER']:
       flags = flags | pygame.DOUBLEBUF
 
-    lm("Config Loaded")
+    system['commandImage']  = pygame.image.load("./resources/commands.png")
+    system['commandLayout'] = {'turnClockwise':0 ,'turnCounterClockwise': 100 ,'moveForward':200 }
+    system['clock']         = pygame.time.Clock()
+    system['screen']        = pygame.display.set_mode((system['CONFIG']['C_WIDTH'], \
+                                                       system['CONFIG']['C_HEIGHT']), flags,\
+                                                      system['CONFIG']['C_COLORDEPTH'])
 
-    lm("Loading command image")
-    commandImage  = pygame.image.load("./resources/commands.png")
-    commandLayout = {'turnClockwise':0 ,'turnCounterClockwise': 100 ,'moveForward':200 }
-    lm("Image loaded")
+    system['grassTexture']  = "./resources/grassTexture.jpg"
+    system['currentMap']    = 0
+    system['maxMap']        = 1
+    system = loadMap(system)
+    system['state'] = "menu"
+    system['tic'] = 0
 
-    clock         = pygame.time.Clock()
-    screen        = pygame.display.set_mode((C_WIDTH, C_HEIGHT), flags, C_COLORDEPTH)
-
-    lm("Loading Map")
-    [mapImage, checkCrash, C_TILESIZE, mapGoal] = loadMap("./maps/map1.json", "./resources/grassTexture.jpg")
-    lm("Map Loaded")
-
-    robot = createSprite("robot",(400,400))
-    goal  = createSprite("goal",mapGoal)
-    tic = 0
-
-    if C_USEGPIO:
+    if system['CONFIG']['C_USEGPIO']:
       from buttonInterface import *
-      lm("Configuring GPIO")
-      configGPIO( C_GPIOCONFIG )
-      lm("Configured")
+      configGPIO( system,config )
 
     while True:
-      clock.tick(C_FPS)
-      tic += 1
+      system['clock'].tick(system['CONFIG']['C_FPS'])
+      system['tic'] += 1
 
       # there are two phases:
       # phase 1 input your commands
       # phase 2 let the commands run
       # in phase two no input is allowed
-      if C_INPUTACTIVE:
-        if C_USEGPIO:
-          robot = pollGPIO(C_GPIOCONFIG, robot)
+      if system['CONFIG']['C_INPUTACTIVE']:
+        if system['CONFIG']['C_USEGPIO']:
+          system = pollGPIO(system)
 
-        lm("Polling for keyboard events")
         for event in pygame.event.get():
-          if event.type  ==  pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-              robot = pushQ(robot, "turnCounterClockwise")
-            if event.key == pygame.K_RIGHT:
-              robot = pushQ(robot, "turnClockwise")
-            if event.key == pygame.K_UP:
-              robot = pushQ(robot,"moveForward")
-            if event.key == pygame.K_p:
-              robot = activate(robot)
-            if event.key == pygame.K_c:
-              robot = clearQ()
-            if event.key == pygame.K_n:
-              robot['state'] = "moving"
+          # game loop
+          if system['state'] == "game":
+            if event.type  ==  pygame.KEYDOWN:
+              if event.key == pygame.K_LEFT:
+                system = pushQ("turnCounterClockwise", system)
+              if event.key == pygame.K_RIGHT:
+                system = pushQ("turnClockwise", system)
+              if event.key == pygame.K_UP:
+                system = pushQ("moveForward", system)
+              if event.key == pygame.K_p:
+                system['sprite_robot']['state'] = "moving"
+              if event.key == pygame.K_c:
+                system = clearQ(system)
+              if event.key == pygame.K_n:
+                system['sprite_robot']['state'] = "moving"
+
+          # menu loop
+          if system['state'] == "menu":
+            if event.type  ==  pygame.KEYDOWN:
+              if event.key == pygame.K_UP:
+                system['currentMap'] = system['currentMap'] + 1
+                if system['currentMap'] > system['maxMap']:
+                  system['currentMap'] = 0
+                system = loadMap(system)
+
+              if event.key == pygame.K_DOWN:
+                system['currentMap'] = system['currentMap'] - 1
+                if system['currentMap'] < 0:
+                  system['currentMap'] = system['maxMap']
+                system = loadMap(system)
+
+              if event.key == pygame.K_n:
+                system['state'] = "game"
 
           if event.type == pygame.QUIT or \
              (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-              exitGame(C_USEGPIO)
+              exitGame(system)
               sys.exit()
 
       # game loop
-      if robot['state'] == "moving" and spriteCrash(robot, goal):
-        robot['state'] = 'win'
+      system = calcWin(system)
+      system = calcCrash(system)
 
-      if robot['state'] == "moving" and checkCrash( robot['x']   , robot['y'] ):
-        robot['state'] = 'lose'
+      if system['sprite_robot']['state'] == "moving":
+        system = updateRobot(system)
+        system = updateState(system)
+        system = moveSprite(system)
 
-      if robot['state'] == "moving":
-        robot = updateRobot(robot)
-        robot = updateState(robot, C_SOUNDS)
-        robot = moveSprite(robot, C_SOUNDS)
-
-      screen.blit( mapImage, (0,0) )
-      goal  = drawSprite(goal, tic, C_FPS, screen)
-      robot = drawSprite(robot, tic, C_FPS , screen)
-      robot = drawCommands(robot, commandImage, commandLayout, C_HEIGHT, C_TILESIZE, screen)
+      system['screen'].blit( system['mapImage'], (0,0) )
+      drawSprite("goal", system)
+      drawSprite("robot", system)
+      system = drawCommands(system)
       pygame.display.flip()
 
-
-
-      # if robot['state'] == 'win' or robot['state'] == 'lose':
-      #   showMenu()
-
-      lm("Finished")
+      if system['sprite_robot']['state'] == 'win' or system['sprite_robot']['state'] == 'lose':
+        system['state'] = "menu"
