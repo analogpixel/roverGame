@@ -98,3 +98,28 @@ def drawCommands(system):
                              (system['commandLayout'][command], 0, 100,100))
       x = x + system['tileHeight']
   return system
+
+
+def drawMenu(system):
+  color = False
+  for i in range(0, system['maxMap'] + 1):
+
+    if i == system['currentMap']:
+      color = pygame.Color(255,0,0,10)
+    else:
+      color = pygame.Color(0,0,255, 90)
+
+    system['screen'].fill(color, (300 ,300 + i  * 40,500,30), special_flags= pygame.BLEND_RGBA_MAX )
+    system = text("Level " + str( i + 1) ,300, 300 + i * 40, system)
+
+  return system
+
+
+def text(t,x,y, system):
+  if pygame.font:
+    font = pygame.font.Font(None, 36)
+    text = font.render(t, 1, (10, 10, 10))
+    textpos = text.get_rect(centerx=system['screen'].get_width()/2 )
+    textpos[1] = y
+    system['screen'].blit(text, textpos)
+  return system

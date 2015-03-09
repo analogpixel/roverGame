@@ -59,6 +59,7 @@ if __name__ == '__main__':
     if system['CONFIG']['C_DBUFFER']:
       flags = flags | pygame.DOUBLEBUF
 
+
     system['commandImage']  = pygame.image.load("./resources/commands.png")
     system['commandLayout'] = {'turnClockwise':0 ,'turnCounterClockwise': 100 ,'moveForward':200 }
     system['clock']         = pygame.time.Clock()
@@ -142,6 +143,10 @@ if __name__ == '__main__':
       drawSprite("goal", system)
       drawSprite("robot", system)
       system = drawCommands(system)
+
+      if system['state'] == "menu":
+        system = drawMenu(system)
+
       pygame.display.flip()
 
       if system['sprite_robot']['state'] == 'win' or system['sprite_robot']['state'] == 'lose':
