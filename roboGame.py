@@ -14,7 +14,7 @@ def exitGame(system):
     GPIO.cleanup()
   sys.exit()
 
-system = { 'CONFIG': {} }
+system = { 'CONFIG': {}, 'grid': False }
 
 if __name__ == '__main__':
 
@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     if system['CONFIG']['C_USEGPIO']:
       from buttonInterface import *
-      configGPIO( system,config )
+      system = configGPIO( system )
 
     while True:
       system['clock'].tick(system['CONFIG']['C_FPS'])
@@ -147,7 +147,15 @@ if __name__ == '__main__':
       if system['state'] == "menu":
         system = drawMenu(system)
 
+      if system['grid']:
+        c = pygame.Color(255,0,0,20)
+        for x in range(0, system['mapWidth']):
+          for y in range(0, system['mapHeight']):
+            pygame.draw.rect( system['screen'], c, (x*100, y*100, 100,100),1)
+
       pygame.display.flip()
+
 
       if system['sprite_robot']['state'] == 'win' or system['sprite_robot']['state'] == 'lose':
         system['state'] = "menu"
+        system = loadMap(system)
