@@ -49,10 +49,12 @@ def pollGPIO(system):
           system = pushQ("moveForward", system)
 
       if opt['command'] == "grid":
-        system['grid'] = not system['grid']
+        system['grid'] = GPIO.input( int(opt['in']))
+        # system['grid'] = not system['grid']
 
         if system['grid']:
           GPIO.output( int(opt['out']), 1)
         else:
           GPIO.output( int(opt['out']), 0)
+
   return system
