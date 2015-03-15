@@ -74,6 +74,12 @@ if __name__ == '__main__':
     system['state'] = "menu"
     system['tic'] = 0
 
+    #system['controlImage']  = pygame.Surface( ( (system['mapWidth'] * system['tileWidth']), 100) , pygame.SRCALPHA, 32 )
+    #system['controlImage'] = system['controlImage'].convert_alpha()
+
+    system['controlImage']  = pygame.Surface( ( (system['mapWidth'] * system['tileWidth']), 100) )
+    system['controlImage'].set_colorkey((0,0,0))
+
     if system['CONFIG']['C_USEGPIO']:
       from buttonInterface import *
       system = configGPIO( system )
@@ -106,6 +112,8 @@ if __name__ == '__main__':
                 system = clearQ(system)
               if event.key == pygame.K_n:
                 system['sprite_robot']['state'] = "moving"
+              if event.key == pygame.K_g:
+                system['grid'] = not system['grid']
 
           # menu loop
           if system['state'] == "menu":
@@ -136,26 +144,28 @@ if __name__ == '__main__':
 
       if system['sprite_robot']['state'] == "moving":
         system = updateRobot(system)
-        system = updateState(system)
+
         system = moveSprite(system)
 
-      system['screen'].blit( system['mapImage'], (0,0) )
+      if system['grid']:
+        system['screen'].blit( system['mapImageGrid'], (0,0) )
+      else:
+        system['screen'].blit( system['mapImage'], (0,0) )
+
+      system['screen'].blit( system['controlImage'], ( 0 , system['mapHeight'] * 100 - 100) )
+
       drawSprite("goal", system)
       drawSprite("robot", system)
-      system = drawCommands(system)
 
       if system['state'] == "menu":
         system = drawMenu(system)
 
-      if system['grid']:
-        c = pygame.Color(255,0,0,20)
-        for x in range(0, system['mapWidth']):
-          for y in range(0, system['mapHeight']):
-            pygame.draw.rect( system['screen'], c, (x*100, y*100, 100,100),1)
-
-      pygame.display.flip()
-
+      # update the robot status
+      system = updateState(system)
 
       if system['sprite_robot']['state'] == 'win' or system['sprite_robot']['state'] == 'lose':
         system['state'] = "menu"
         system = loadMap(system)
+
+
+      pygame.display.flip()

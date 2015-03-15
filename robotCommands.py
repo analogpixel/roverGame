@@ -2,6 +2,7 @@
 Commands to control the robot
 """
 import math
+from  spriteFunctions import *
 
 def calcWin(system):
   if system['sprite_robot']['state'] == "moving" and \
@@ -52,7 +53,7 @@ def pushQ(command, system):
   else:
     system['commandq'] = [command]
 
-  return system
+  return drawCommands(system)
 
 def getNextCommand(system):
   """
@@ -61,6 +62,7 @@ def getNextCommand(system):
   """
   if "commandq" in system and len(system["commandq"]) > 0:
     system["currentCommand"] = system["commandq"].pop(0)
+    system = drawCommands(system)
     system = globals()[system['currentCommand']](system)
 
   return system

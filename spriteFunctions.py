@@ -91,12 +91,13 @@ def drawCommands(system):
   if not ("commandq" in system):
     return system
   x = 0
+
+  system['controlImage'].fill( pygame.Color(0,0,0,0) )
   for command in reversed(system['commandq']):
     if command in system['commandLayout']:
-      system['screen'].blit( system['commandImage']  ,\
-                             (x, (system['mapHeight']*system['tileHeight']) - system['tileHeight']), \
-                             (system['commandLayout'][command], 0, 100,100))
+      system['controlImage'].blit( system['commandImage'] , (x, 0), (system['commandLayout'][command], 0, 100,100))
       x = x + system['tileHeight']
+
   return system
 
 

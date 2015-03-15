@@ -55,6 +55,12 @@ def loadMap(system):
       x = 0
       y += 1
 
+  # create a version of the map with the grid on it (saves on redraw cycles)
+  system['mapImageGrid'] = system['mapImage'].copy()
+  c = pygame.Color(255,0,0,20)
+  for x in range(0, system['mapWidth']):
+    for y in range(0, system['mapHeight']):
+      pygame.draw.rect( system['mapImageGrid'], c, (x*100, y*100, 100,100),1)
 
   # function to tell us if the current x,y is a crash point
   system['crashFunction'] = lambda x,y: tileData["%s,%s" % ( int(math.ceil(x/100)) ,int(math.ceil(y/100)) )]['crash'] == "true"
