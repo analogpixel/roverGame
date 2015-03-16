@@ -33,6 +33,9 @@ def loadMap(system):
   system['mapImage']              = pygame.Surface( (system['mapWidth'] * system['tileWidth'],\
                                                      system['mapHeight'] * system['tileHeight']))
 
+  system['controlImage']  = pygame.Surface( ( (system['mapWidth'] * system['tileWidth']), 100) )
+  system['controlImage'].set_colorkey((0,0,0))
+
   x = 0
   y = 0
   tileData = {}
@@ -65,4 +68,5 @@ def loadMap(system):
   # function to tell us if the current x,y is a crash point
   system['crashFunction'] = lambda x,y: tileData["%s,%s" % ( int(math.ceil(x/100)) ,int(math.ceil(y/100)) )]['crash'] == "true"
 
+  system = drawCommands(system)
   return system

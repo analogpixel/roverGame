@@ -15,6 +15,7 @@ def exitGame(system):
   sys.exit()
 
 system = { 'CONFIG': {}, 'grid': False }
+waitCount = 0
 
 if __name__ == '__main__':
 
@@ -60,12 +61,14 @@ if __name__ == '__main__':
       flags = flags | pygame.DOUBLEBUF
 
 
+    system['menuImage']     = pygame.image.load("./resources/menu.png")
     system['commandImage']  = pygame.image.load("./resources/commands.png")
     system['commandLayout'] = {'turnClockwise':0 ,'turnCounterClockwise': 100 ,'moveForward':200 }
     system['clock']         = pygame.time.Clock()
     system['screen']        = pygame.display.set_mode((system['CONFIG']['C_WIDTH'], \
                                                        system['CONFIG']['C_HEIGHT']), flags,\
                                                       system['CONFIG']['C_COLORDEPTH'])
+
 
     system['grassTexture']  = "./resources/grassTexture.jpg"
     system['currentMap']    = 0
@@ -77,8 +80,7 @@ if __name__ == '__main__':
     #system['controlImage']  = pygame.Surface( ( (system['mapWidth'] * system['tileWidth']), 100) , pygame.SRCALPHA, 32 )
     #system['controlImage'] = system['controlImage'].convert_alpha()
 
-    system['controlImage']  = pygame.Surface( ( (system['mapWidth'] * system['tileWidth']), 100) )
-    system['controlImage'].set_colorkey((0,0,0))
+
 
     if system['CONFIG']['C_USEGPIO']:
       from buttonInterface import *
@@ -131,6 +133,7 @@ if __name__ == '__main__':
                 system = loadMap(system)
 
               if event.key == pygame.K_n:
+                system = loadMap(system)
                 system['state'] = "game"
 
           if event.type == pygame.QUIT or \
@@ -138,34 +141,46 @@ if __name__ == '__main__':
               exitGame(system)
               sys.exit()
 
-      # game loop
-      system = calcWin(system)
-      system = calcCrash(system)
 
-      if system['sprite_robot']['state'] == "moving":
-        system = updateRobot(system)
-
-        system = moveSprite(system)
-
-      if system['grid']:
-        system['screen'].blit( system['mapImageGrid'], (0,0) )
-      else:
-        system['screen'].blit( system['mapImage'], (0,0) )
-
-      system['screen'].blit( system['controlImage'], ( 0 , system['mapHeight'] * 100 - 100) )
-
-      drawSprite("goal", system)
-      drawSprite("robot", system)
 
       if system['state'] == "menu":
-        system = drawMenu(system)
+        waitCount -= 1
+        if waitCount < 0:
+          system['screen'].blit( system['menuImage'], (0,0) )
+          system = drawMenu(system)
+      elif system['state'] == "wait":
+        waitCount -= 1
+        if system['grid']:
+          system['screen'].blit( system['mapImageGrid'], (0,0) )
+        else:
+          system['screen'].blit( system['mapImage'], (0,0) )
+        drawSprite("goal", system)
+        drawSprite("robot", system)
+        if waitCount < 0:
+          system['state'] = "menu"
+      else:
+        system = calcWin(system)
+        system = calcCrash(system)
+
+        if system['sprite_robot']['state'] == "moving":
+          system = updateRobot(system)
+          system = moveSprite(system)
+
+        if system['grid']:
+          system['screen'].blit( system['mapImageGrid'], (0,0) )
+        else:
+          system['screen'].blit( system['mapImage'], (0,0) )
+
+        system['screen'].blit( system['controlImage'], ( 0 , system['mapHeight'] * 100 - 100) )
+        drawSprite("goal", system)
+        drawSprite("robot", system)
+
+        if system['sprite_robot']['state'] == 'win' or system['sprite_robot']['state'] == 'lose':
+          system['state'] = "wait"
+          waitCount = 50
+
 
       # update the robot status
       system = updateState(system)
-
-      if system['sprite_robot']['state'] == 'win' or system['sprite_robot']['state'] == 'lose':
-        system['state'] = "menu"
-        system = loadMap(system)
-
 
       pygame.display.flip()
