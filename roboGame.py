@@ -65,9 +65,11 @@ if __name__ == '__main__':
 
     system['commandLayout'] = {'turnClockwise':0 ,'turnCounterClockwise': 100 ,'moveForward':200 }
     system['clock']         = pygame.time.Clock()
-    system['screen']        = pygame.display.set_mode((system['CONFIG']['C_WIDTH'], \
-                                                       system['CONFIG']['C_HEIGHT']), flags,\
-                                                      system['CONFIG']['C_COLORDEPTH'])
+    #system['screen']        = pygame.display.set_mode((system['CONFIG']['C_WIDTH'], \
+                                                    #   system['CONFIG']['C_HEIGHT']), flags,\
+                                                    #  system['CONFIG']['C_COLORDEPTH'])
+    system['screen'] = pygame.display.set_mode( (0,0), pygame.FULLSCREEN)
+
     system['menuImage']     = pygame.image.load("./resources/menu.png").convert()
     system['commandImage']  = pygame.image.load("./resources/commands.png").convert()
 
