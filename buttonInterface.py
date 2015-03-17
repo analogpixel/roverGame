@@ -24,6 +24,7 @@ def pollGPIO(system):
         if system['state'] == "game":
           system['sprite_robot']['state'] = "moving"
         if system['state'] == "menu":
+          system = loadMap(system)
           system['state'] = "game"
 
       if opt['command'] == "turnClockwise":

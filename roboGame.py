@@ -8,6 +8,7 @@ from mapFunctions import *
 from localutil import *
 from robotCommands import *
 
+# http://www.pygame.org/docs/tut/newbieguide.html
 
 def exitGame(system):
   if system['CONFIG']['C_USEGPIO']:
@@ -61,14 +62,14 @@ if __name__ == '__main__':
       flags = flags | pygame.DOUBLEBUF
 
 
-    system['menuImage']     = pygame.image.load("./resources/menu.png")
-    system['commandImage']  = pygame.image.load("./resources/commands.png")
+
     system['commandLayout'] = {'turnClockwise':0 ,'turnCounterClockwise': 100 ,'moveForward':200 }
     system['clock']         = pygame.time.Clock()
     system['screen']        = pygame.display.set_mode((system['CONFIG']['C_WIDTH'], \
                                                        system['CONFIG']['C_HEIGHT']), flags,\
                                                       system['CONFIG']['C_COLORDEPTH'])
-
+    system['menuImage']     = pygame.image.load("./resources/menu.png").convert()
+    system['commandImage']  = pygame.image.load("./resources/commands.png").convert()
 
     system['grassTexture']  = "./resources/grassTexture.jpg"
     system['currentMap']    = 0
@@ -124,13 +125,11 @@ if __name__ == '__main__':
                 system['currentMap'] = system['currentMap'] + 1
                 if system['currentMap'] > system['maxMap']:
                   system['currentMap'] = 0
-                system = loadMap(system)
 
               if event.key == pygame.K_DOWN:
                 system['currentMap'] = system['currentMap'] - 1
                 if system['currentMap'] < 0:
                   system['currentMap'] = system['maxMap']
-                system = loadMap(system)
 
               if event.key == pygame.K_n:
                 system = loadMap(system)
@@ -144,20 +143,14 @@ if __name__ == '__main__':
 
 
       if system['state'] == "menu":
-        waitCount -= 1
-        if waitCount < 0:
-          system['screen'].blit( system['menuImage'], (0,0) )
-          system = drawMenu(system)
+        system['screen'].blit( system['menuImage'], (0,0) )
+        system = drawMenu(system)
+
       elif system['state'] == "wait":
         waitCount -= 1
-        if system['grid']:
-          system['screen'].blit( system['mapImageGrid'], (0,0) )
-        else:
-          system['screen'].blit( system['mapImage'], (0,0) )
-        drawSprite("goal", system)
-        drawSprite("robot", system)
         if waitCount < 0:
           system['state'] = "menu"
+
       else:
         system = calcWin(system)
         system = calcCrash(system)
@@ -166,6 +159,11 @@ if __name__ == '__main__':
           system = updateRobot(system)
           system = moveSprite(system)
 
+        if system['sprite_robot']['state'] == 'win' or system['sprite_robot']['state'] == 'lose':
+          system['state'] = "wait"
+          waitCount = 50
+
+      if system['state'] != "menu":
         if system['grid']:
           system['screen'].blit( system['mapImageGrid'], (0,0) )
         else:
@@ -174,11 +172,6 @@ if __name__ == '__main__':
         system['screen'].blit( system['controlImage'], ( 0 , system['mapHeight'] * 100 - 100) )
         drawSprite("goal", system)
         drawSprite("robot", system)
-
-        if system['sprite_robot']['state'] == 'win' or system['sprite_robot']['state'] == 'lose':
-          system['state'] = "wait"
-          waitCount = 50
-
 
       # update the robot status
       system = updateState(system)

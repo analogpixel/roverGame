@@ -6,6 +6,9 @@ import pygame
 import math
 from spriteFunctions import *
 
+def clamp(n, minn, maxn):
+    return max(min(maxn, n), minn)
+
 def loadMap(system):
   mapData = json.loads( open("./maps/map" + str(system['currentMap']) + ".json" ).read() )
 
@@ -66,7 +69,7 @@ def loadMap(system):
       pygame.draw.rect( system['mapImageGrid'], c, (x*100, y*100, 100,100),1)
 
   # function to tell us if the current x,y is a crash point
-  system['crashFunction'] = lambda x,y: tileData["%s,%s" % ( int(math.ceil(x/100)) ,int(math.ceil(y/100)) )]['crash'] == "true"
+  system['crashFunction'] = lambda x,y: x>0 and y>0 and tileData["%s,%s" % ( int(math.ceil(x/100)) , int(math.ceil(y/100)) )]['crash'] == "true"
 
   system = drawCommands(system)
   return system

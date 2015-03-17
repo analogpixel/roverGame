@@ -104,16 +104,8 @@ def drawCommands(system):
 def drawMenu(system):
   color = False
   for i in range(0, system['maxMap'] + 1):
-
-    if i == system['currentMap']:
-      color = pygame.Color(255,0,0,10)
-    else:
-      color = pygame.Color(0,0,255, 90)
-
-    #system['screen'].fill(color, (300 ,300 + i  * 40,500,30), special_flags= pygame.BLEND_RGBA_MAX )
     pygame.draw.circle( system['screen'], (55,113,200), (560, 510 + 40 *  system['currentMap']) ,10)
     system = text("Mission " + str( i + 1) ,500, 500 + i * 40, system)
-
   return system
 
 
