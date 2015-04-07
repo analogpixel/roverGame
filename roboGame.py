@@ -15,7 +15,7 @@ def exitGame(system):
     GPIO.cleanup()
   sys.exit()
 
-system = { 'CONFIG': {}, 'grid': False }
+system = { 'CONFIG': {}, 'grid': False, 'updateMenu': True, 'updateScreen': False }
 waitCount = 0
 
 if __name__ == '__main__':
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     #system['screen']        = pygame.display.set_mode((system['CONFIG']['C_WIDTH'], \
                                                     #   system['CONFIG']['C_HEIGHT']), flags,\
                                                     #  system['CONFIG']['C_COLORDEPTH'])
-    system['screen'] = pygame.display.set_mode( (0,0), pygame.FULLSCREEN)
+    system['screen'] = pygame.display.set_mode( (0,0), flags)
 
     system['menuImage']     = pygame.image.load("./resources/menu.png").convert()
     system['commandImage']  = pygame.image.load("./resources/commands.png").convert()
@@ -79,11 +79,6 @@ if __name__ == '__main__':
     system = loadMap(system)
     system['state'] = "menu"
     system['tic'] = 0
-
-    #system['controlImage']  = pygame.Surface( ( (system['mapWidth'] * system['tileWidth']), 100) , pygame.SRCALPHA, 32 )
-    #system['controlImage'] = system['controlImage'].convert_alpha()
-
-
 
     if system['CONFIG']['C_USEGPIO']:
       from buttonInterface import *
@@ -123,6 +118,7 @@ if __name__ == '__main__':
           # menu loop
           if system['state'] == "menu":
             if event.type  ==  pygame.KEYDOWN:
+              system['updateMenu'] = True
               if event.key == pygame.K_UP:
                 system['currentMap'] = system['currentMap'] + 1
                 if system['currentMap'] > system['maxMap']:
@@ -136,6 +132,7 @@ if __name__ == '__main__':
               if event.key == pygame.K_n:
                 system = loadMap(system)
                 system['state'] = "game"
+                system['updateScreen'] = True
 
           if event.type == pygame.QUIT or \
              (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
@@ -143,16 +140,23 @@ if __name__ == '__main__':
               sys.exit()
 
 
-
+      # if the menu needs to be updated draw it
+      # otherwise do nothing
       if system['state'] == "menu":
-        system['screen'].blit( system['menuImage'], (0,0) )
+        if system['updateMenu']:
+          system['screen'].blit( system['menuImage'], (0,0) )
+          system['updateMenu'] = False
         system = drawMenu(system)
 
+      # wait for the timer to run down before showing the menu
       elif system['state'] == "wait":
         waitCount -= 1
         if waitCount < 0:
           system['state'] = "menu"
+          system['updateMenu'] = True
 
+      # if we aren't waiting or in the menu, then update the sprite
+      # states
       else:
         system = calcWin(system)
         system = calcCrash(system)
@@ -161,21 +165,46 @@ if __name__ == '__main__':
           system = updateRobot(system)
           system = moveSprite(system)
 
+        # if we lose or win, wait 50 frames before going to the menu so we have time to see
+        # the little explosion or winning frames
         if system['sprite_robot']['state'] == 'win' or system['sprite_robot']['state'] == 'lose':
           system['state'] = "wait"
           waitCount = 50
 
+      # this is were we draw if this isn't the menu being updated
       if system['state'] != "menu":
-        if system['grid']:
-          system['screen'].blit( system['mapImageGrid'], (0,0) )
-        else:
-          system['screen'].blit( system['mapImage'], (0,0) )
+        rx = system['sprite_robot']['x']
+        ry = system['sprite_robot']['y']
+        gx = system['sprite_goal']['x']
+        gy = system['sprite_goal']['y']
 
+        # if this is a full refresh then draw then entire screen
+        # otherwise just draw around where the objects are changing
+        if system['updateScreen']:
+          system['updateScreen'] = False
+          if system['grid']:
+            system['screen'].blit( system['mapImageGrid'], (0,0) )
+          else:
+            system['screen'].blit( system['mapImage'], (0,0) )
+        else:
+          if system['grid']:
+            system['screen'].blit( system['mapImageGrid'], (rx-20,ry-20), (rx-20,ry-120, 140,140 ))
+            system['screen'].blit( system['mapImageGrid'], (gx-10,gy-10), (gx-10,gy-10, 120,120 ))
+          else:
+            system['screen'].blit( system['mapImage'], (rx-30,ry-30), (rx-30,ry-30, 160,160 ))
+            system['screen'].blit( system['mapImage'], (gx-10,gy-10), (gx-10,gy-10, 120,120 ))
+
+        # controlImage is the bar at the bottom that shows the commands
+        # it is only rendered when needed as to speed this up on the pi
         system['screen'].blit( system['controlImage'], ( 0 , system['mapHeight'] * 100 - 100) )
+
+        # draw the goal and the robot
         drawSprite("goal", system)
         drawSprite("robot", system)
 
       # update the robot status
+      # need to be able to see state changes here to start and stop sounds
       system = updateState(system)
 
+      # draw all the changes to the screen
       pygame.display.flip()

@@ -103,6 +103,11 @@ def drawCommands(system):
 
 def drawMenu(system):
   color = False
+
+  # re-draw the part of the menu that gets clobberd by the moving ball
+  # otherwise leave the rest alone.
+  system['screen'].blit( system['menuImage'], (50,100), (50, 100, 200,200 ))
+
   for i in range(0, system['maxMap'] + 1):
     pygame.draw.circle( system['screen'], (55,113,200), (560, 510 + 40 *  system['currentMap']) ,10)
     system = text("Mission " + str( i + 1) ,500, 500 + i * 40, system)

@@ -26,11 +26,13 @@ def pollGPIO(system):
         if system['state'] == "menu":
           system = loadMap(system)
           system['state'] = "game"
+          system['updateScreen'] = True
 
       if opt['command'] == "turnClockwise":
         if system['state'] == "game":
           system = pushQ("turnClockwise", system)
         if system['state'] == "menu":
+          system['updatMenu'] = True
           system['currentMap'] = system['currentMap'] + 1
           if system['currentMap'] > system['maxMap']:
             system['currentMap'] = 0
@@ -40,6 +42,7 @@ def pollGPIO(system):
         if system['state'] == "game":
           system = pushQ("turnCounterClockwise", system)
         if system['state'] == "menu":
+          system['updateMenu'] = True
           system['currentMap'] = system['currentMap'] - 1
           if system['currentMap'] < 0:
             system['currentMap'] = system['maxMap']
