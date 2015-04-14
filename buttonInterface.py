@@ -53,6 +53,7 @@ def pollGPIO(system):
           system = pushQ("moveForward", system)
 
       if opt['command'] == "grid":
+        system['updateScreen'] = True
         system['grid'] = GPIO.input( int(opt['in']))
         # system['grid'] = not system['grid']
 

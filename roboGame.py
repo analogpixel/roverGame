@@ -115,6 +115,7 @@ if __name__ == '__main__':
                 system['sprite_robot']['state'] = "moving"
               if event.key == pygame.K_g:
                 system['grid'] = not system['grid']
+                system['updateScreen'] = True
 
           # menu loop
           if system['state'] == "menu":
@@ -189,7 +190,7 @@ if __name__ == '__main__':
             system['screen'].blit( system['mapImage'], (0,0) )
         else:
           if system['grid']:
-            system['screen'].blit( system['mapImageGrid'], (rx-20,ry-20), (rx-20,ry-120, 140,140 ))
+            system['screen'].blit( system['mapImageGrid'], (rx-30,ry-30), (rx-30,ry-30, 160,160 ))
             system['screen'].blit( system['mapImageGrid'], (gx-10,gy-10), (gx-10,gy-10, 120,120 ))
           else:
             system['screen'].blit( system['mapImage'], (rx-30,ry-30), (rx-30,ry-30, 160,160 ))
