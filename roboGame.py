@@ -34,6 +34,7 @@ if __name__ == '__main__':
         system['CONFIG']['C_USEGPIO']    = c.getboolean('config', 'useGPIO')
         system['CONFIG']['C_FPS']        = c.getint('config','fps')
         system['CONFIG']['C_COLORDEPTH'] = c.getint('config','colorDepth')
+        system['CONFIG']['C_MAXMAPS']    = c.getint('config','maxmaps')
         system['CONFIG']['C_TILESIZE']   = 0 # define in loadMap
         system['CONFIG']['C_GPIOCONFIG'] = []
 
@@ -75,7 +76,7 @@ if __name__ == '__main__':
 
     system['grassTexture']  = "./resources/grassTexture.jpg"
     system['currentMap']    = 0
-    system['maxMap']        = 1
+    system['maxMap']        = system['CONFIG']['C_MAXMAPS']
     system = loadMap(system)
     system['state'] = "menu"
     system['tic'] = 0
@@ -119,12 +120,12 @@ if __name__ == '__main__':
           if system['state'] == "menu":
             if event.type  ==  pygame.KEYDOWN:
               system['updateMenu'] = True
-              if event.key == pygame.K_UP:
+              if event.key == pygame.K_DOWN:
                 system['currentMap'] = system['currentMap'] + 1
                 if system['currentMap'] > system['maxMap']:
                   system['currentMap'] = 0
 
-              if event.key == pygame.K_DOWN:
+              if event.key == pygame.K_UP:
                 system['currentMap'] = system['currentMap'] - 1
                 if system['currentMap'] < 0:
                   system['currentMap'] = system['maxMap']
