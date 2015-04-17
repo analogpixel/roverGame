@@ -19,6 +19,7 @@ def configGPIO(system):
 def pollGPIO(system):
   for opt in system['CONFIG']['C_GPIOCONFIG']:
     if GPIO.event_detected(int(opt['in'])):
+      system['updateScreen'] = True
 
       if opt['command'] == "activate":
         if system['state'] == "game":
@@ -26,7 +27,7 @@ def pollGPIO(system):
         if system['state'] == "menu":
           system = loadMap(system)
           system['state'] = "game"
-          system['updateScreen'] = True
+
 
       if opt['command'] == "turnClockwise":
         if system['state'] == "game":
@@ -53,9 +54,8 @@ def pollGPIO(system):
           system = pushQ("moveForward", system)
 
       if opt['command'] == "grid":
-        system['updateScreen'] = True
         system['grid'] = GPIO.input( int(opt['in']))
-        # system['grid'] = not system['grid']
+        system['grid'] = not system['grid']
 
         if system['grid']:
           GPIO.output( int(opt['out']), 1)
