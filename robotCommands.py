@@ -55,6 +55,12 @@ def pushQ(command, system):
 
   return drawCommands(system)
 
+def popQ(system):
+  if "commandq" in system and len(system["commandq"]) > 0:
+    system["commandq"].pop(0)
+    system = drawCommands(system)
+  return system
+
 def getNextCommand(system):
   """
   pop off a command which is also a function name

@@ -9,6 +9,7 @@ from localutil import *
 from robotCommands import *
 
 # http://www.pygame.org/docs/tut/newbieguide.html
+# to get sound through hdmi: amixer cset numid=3 2
 
 def exitGame(system):
   if system['CONFIG']['C_USEGPIO']:
@@ -35,6 +36,8 @@ if __name__ == '__main__':
         system['CONFIG']['C_FPS']        = c.getint('config','fps')
         system['CONFIG']['C_COLORDEPTH'] = c.getint('config','colorDepth')
         system['CONFIG']['C_MAXMAPS']    = c.getint('config','maxmaps')
+        system['CONFIG']['C_GAMEBUTTONS']= c.get('config','gameButtons').split(',')
+        system['CONFIG']['C_MENUBUTTONS']= c.get('config','menuButtons').split(',')
         system['CONFIG']['C_TILESIZE']   = 0 # define in loadMap
         system['CONFIG']['C_GPIOCONFIG'] = []
 
@@ -89,6 +92,7 @@ if __name__ == '__main__':
       system['clock'].tick(system['CONFIG']['C_FPS'])
       system['tic'] += 1
 
+      system = updateLights(system)
       # there are two phases:
       # phase 1 input your commands
       # phase 2 let the commands run
@@ -111,6 +115,9 @@ if __name__ == '__main__':
                 system['sprite_robot']['state'] = "moving"
               if event.key == pygame.K_c:
                 system = clearQ(system)
+              if event.key == pygame.K_u:
+                system = popQ(system)
+                system['updateScreen'] = True
               if event.key == pygame.K_n:
                 system['sprite_robot']['state'] = "moving"
               if event.key == pygame.K_g:

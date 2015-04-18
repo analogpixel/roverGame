@@ -16,10 +16,27 @@ def configGPIO(system):
 
   return system
 
+def updateLights(system):
+  # clear all
+  for opt in system['CONFIG']['C_GPIOCONFIG']:
+    GPIO.output( int( opt['out'] ), 0)
+
+  # based on the mode setup the lights
+  if system['state'] == "game":
+    for b in system['CONFIG']['C_GAMEBUTTONS']:
+      GPIO.output(int(b), 1)
+  if system['state'] == "menu":
+    for b in system['CONFIG']['C_MENUBUTTONS']:
+      GPIO.output(int(b),1)
+
+  return system
+
 def pollGPIO(system):
   for opt in system['CONFIG']['C_GPIOCONFIG']:
     if GPIO.event_detected(int(opt['in'])):
       system['updateScreen'] = True
+
+      print("Event on %s\n" % opt['in'])
 
       if opt['command'] == "activate":
         if system['state'] == "game":
@@ -33,7 +50,7 @@ def pollGPIO(system):
         if system['state'] == "game":
           system = pushQ("turnClockwise", system)
         if system['state'] == "menu":
-          system['updatMenu'] = True
+          system['updateMenu'] = True
           system['currentMap'] = system['currentMap'] + 1
           if system['currentMap'] > system['maxMap']:
             system['currentMap'] = 0
@@ -50,6 +67,14 @@ def pollGPIO(system):
           system = loadMap(system)
 
       if opt['command'] == "moveForward":
+        if system['state'] == "game":
+          system = pushQ("moveForward", system)
+
+      if opt['command'] == "backspace":
+        if system['state'] == "game":
+          system = popQ(system)
+          system['updateScreen'] = True
+
         if system['state'] == "game":
           system = pushQ("moveForward", system)
 
