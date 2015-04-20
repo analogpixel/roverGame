@@ -54,6 +54,7 @@ if __name__ == '__main__':
         system['CONFIG']['C_INPUTACTIVE'] = True
 
     pygame.init()
+    system['CONFIG']['C_SOUNDS']['robot_win']['sound'].play()
 
     flags = 0
     if system['CONFIG']['C_FULLSCREEN']:
@@ -92,7 +93,9 @@ if __name__ == '__main__':
       system['clock'].tick(system['CONFIG']['C_FPS'])
       system['tic'] += 1
 
-      system = updateLights(system)
+      if system['CONFIG']['C_USEGPIO']:
+        system = updateLights(system)
+
       # there are two phases:
       # phase 1 input your commands
       # phase 2 let the commands run
@@ -169,6 +172,7 @@ if __name__ == '__main__':
       else:
         system = calcWin(system)
         system = calcCrash(system)
+        system = updateState(system)
 
         if system['sprite_robot']['state'] == "moving":
           system = updateRobot(system)

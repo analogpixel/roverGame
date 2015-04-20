@@ -33,6 +33,7 @@ def updateState(system):
     oldState = "%s_%s" % (system['sprite_robot']['name'], system['sprite_robot']['oldState'])
     newState = "%s_%s" % (system['sprite_robot']['name'], system['sprite_robot']['state'])
 
+    print(oldState, newState)
     # stop any existing sounds
     if oldState in system['CONFIG']['C_SOUNDS']:
       system['CONFIG']['C_SOUNDS'][oldState]['sound'].stop()
