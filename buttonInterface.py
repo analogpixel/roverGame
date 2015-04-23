@@ -34,13 +34,15 @@ def updateLights(system):
 def pollGPIO(system):
   for opt in system['CONFIG']['C_GPIOCONFIG']:
     if GPIO.event_detected(int(opt['in'])):
-      system['updateScreen'] = True
+
 
       print("Event on %s\n" % opt['in'])
 
       if opt['command'] == "activate":
+        system['updateScreen'] = True
         if system['state'] == "game":
           system['sprite_robot']['state'] = "moving"
+
         if system['state'] == "menu":
           system = loadMap(system)
           system['state'] = "game"
@@ -48,7 +50,9 @@ def pollGPIO(system):
 
       if opt['command'] == "turnClockwise":
         if system['state'] == "game":
+          system['updateScreen'] = True
           system = pushQ("turnClockwise", system)
+
         if system['state'] == "menu":
           system['updateMenu'] = True
           system['currentMap'] = system['currentMap'] + 1
@@ -58,7 +62,9 @@ def pollGPIO(system):
 
       if opt['command'] == "turnCounterClockwise":
         if system['state'] == "game":
+          system['updateScreen'] = True
           system = pushQ("turnCounterClockwise", system)
+
         if system['state'] == "menu":
           system['updateMenu'] = True
           system['currentMap'] = system['currentMap'] - 1
@@ -68,6 +74,7 @@ def pollGPIO(system):
 
       if opt['command'] == "moveForward":
         if system['state'] == "game":
+          system['updateScreen'] = True
           system = pushQ("moveForward", system)
 
       if opt['command'] == "backspace":
@@ -75,12 +82,10 @@ def pollGPIO(system):
           system = popQ(system)
           system['updateScreen'] = True
 
-        if system['state'] == "game":
-          system = pushQ("moveForward", system)
-
       if opt['command'] == "grid":
+        system['updateScreen'] = True
         system['grid'] = GPIO.input( int(opt['in']))
-        system['grid'] = not system['grid']
+        #system['grid'] = not system['grid']
 
         if system['grid']:
           GPIO.output( int(opt['out']), 1)
