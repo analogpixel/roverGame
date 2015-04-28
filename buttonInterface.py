@@ -28,6 +28,10 @@ def updateLights(system):
   if system['state'] == "menu":
     for b in system['CONFIG']['C_MENUBUTTONS']:
       GPIO.output(int(b),1)
+  if system['grid']:
+    GPIO.output( 6, 1)
+  else:
+    GPIO.output( 6, 0)
 
   return system
 
@@ -83,11 +87,11 @@ def pollGPIO(system):
           system['updateScreen'] = True
 
       if opt['command'] == "grid":
+        GPIO.output( 6, 1)
         system['updateScreen'] = True
         system['grid'] = GPIO.input( int(opt['in']))
-        #system['grid'] = not system['grid']
 
-        if system['grid']:
+        if not system['grid']:
           GPIO.output( int(opt['out']), 1)
         else:
           GPIO.output( int(opt['out']), 0)
